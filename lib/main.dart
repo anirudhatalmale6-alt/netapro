@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'providers/auth_provider.dart';
 import 'providers/profile_provider.dart';
+import 'screens/landing/landing_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
@@ -41,29 +42,29 @@ class NetaProApp extends StatelessWidget {
 
   GoRouter _createRouter(AuthProvider auth) {
     return GoRouter(
-      initialLocation: '/login',
+      initialLocation: '/',
       redirect: (context, state) {
         final isLoggedIn = auth.isAuthenticated;
-        final isAuthRoute = state.matchedLocation == '/login' ||
-            state.matchedLocation == '/signup';
-        final isPublicProfile = state.matchedLocation.startsWith('/p/');
+        final isPublicRoute = state.matchedLocation == '/' ||
+            state.matchedLocation == '/login' ||
+            state.matchedLocation == '/signup' ||
+            state.matchedLocation.startsWith('/p/');
 
-        // Allow public profiles without auth
-        if (isPublicProfile) return null;
+        // Allow public routes without auth
+        if (isPublicRoute) return null;
 
-        // Redirect to dashboard if logged in and on auth page
-        if (isLoggedIn && isAuthRoute) {
-          return '/dashboard';
-        }
-
-        // Redirect to login if not logged in and not on auth page
-        if (!isLoggedIn && !isAuthRoute) {
-          return '/login';
+        // Redirect to landing if not logged in and trying to access protected route
+        if (!isLoggedIn) {
+          return '/';
         }
 
         return null;
       },
       routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const LandingScreen(),
+        ),
         GoRoute(
           path: '/login',
           builder: (context, state) => const LoginScreen(),

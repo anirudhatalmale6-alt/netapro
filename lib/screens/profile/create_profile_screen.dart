@@ -42,11 +42,15 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   final _livesController = TextEditingController(text: '0');
   final _volunteersController = TextEditingController(text: '0');
   final _upiController = TextEditingController();
+  final _photoUrlController = TextEditingController();
+  final _coverPhotoUrlController = TextEditingController();
 
   String _selectedTemplateId = 'modern_blue';
   bool _donationEnabled = false;
   bool _isPublished = false;
   List<Achievement> _achievements = [];
+  List<String> _galleryImages = [];
+  List<VideoItem> _videos = [];
 
   @override
   void initState() {
@@ -90,6 +94,10 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     _donationEnabled = profile.donationEnabled;
     _isPublished = profile.isPublished;
     _achievements = List.from(profile.achievements);
+    _galleryImages = List.from(profile.galleryImages);
+    _videos = List.from(profile.videos);
+    _photoUrlController.text = profile.photoUrl;
+    _coverPhotoUrlController.text = profile.coverPhotoUrl;
     setState(() {});
   }
 
@@ -114,6 +122,8 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     _livesController.dispose();
     _volunteersController.dispose();
     _upiController.dispose();
+    _photoUrlController.dispose();
+    _coverPhotoUrlController.dispose();
     super.dispose();
   }
 
@@ -174,10 +184,10 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       views: _existingProfile?.views ?? 0,
       createdAt: _existingProfile?.createdAt ?? now,
       updatedAt: now,
-      photoUrl: _existingProfile?.photoUrl ?? '',
-      coverPhotoUrl: _existingProfile?.coverPhotoUrl ?? '',
-      galleryImages: _existingProfile?.galleryImages ?? [],
-      videos: _existingProfile?.videos ?? [],
+      photoUrl: _photoUrlController.text.trim(),
+      coverPhotoUrl: _coverPhotoUrlController.text.trim(),
+      galleryImages: _galleryImages,
+      videos: _videos,
     );
 
     bool success;
@@ -510,6 +520,33 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           maxLines: 5,
           textCapitalization: TextCapitalization.sentences,
         ),
+        const SizedBox(height: 24),
+        Text(
+          'Profile Photo',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextFormField(
+          controller: _photoUrlController,
+          decoration: const InputDecoration(
+            labelText: 'Profile Photo URL',
+            hintText: 'https://example.com/your-photo.jpg',
+            prefixIcon: Icon(Icons.image_outlined),
+            helperText: 'Enter a direct link to your profile photo',
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _coverPhotoUrlController,
+          decoration: const InputDecoration(
+            labelText: 'Cover Photo URL (optional)',
+            hintText: 'https://example.com/cover-photo.jpg',
+            prefixIcon: Icon(Icons.panorama_outlined),
+            helperText: 'Enter a direct link to your cover/banner image',
+          ),
+        ),
       ],
     );
   }
@@ -703,7 +740,237 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
               ),
             );
           }),
+        const SizedBox(height: 32),
+        // Gallery Images
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Photo Gallery',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: _addGalleryImage,
+              icon: const Icon(Icons.add_photo_alternate),
+              label: const Text('Add Image'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (_galleryImages.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text(
+                'No gallery images added yet',
+                style: TextStyle(color: AppTheme.textSecondaryColor),
+              ),
+            ),
+          )
+        else
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _galleryImages.asMap().entries.map((entry) {
+              final index = entry.key;
+              final url = entry.value;
+              return Stack(
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        url,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Center(
+                          child: Icon(Icons.broken_image, color: Colors.grey),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          _galleryImages.removeAt(index);
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close, size: 14, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        const SizedBox(height: 32),
+        // Video Links
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Video Links',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: _addVideo,
+              icon: const Icon(Icons.video_library_outlined),
+              label: const Text('Add Video'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (_videos.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text(
+                'No videos added yet',
+                style: TextStyle(color: AppTheme.textSecondaryColor),
+              ),
+            ),
+          )
+        else
+          ..._videos.asMap().entries.map((entry) {
+            final index = entry.key;
+            final video = entry.value;
+            return Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.red.withAlpha(25),
+                  child: const Icon(Icons.play_circle, color: Colors.red),
+                ),
+                title: Text(video.title),
+                subtitle: Text(
+                  video.url,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  onPressed: () {
+                    setState(() {
+                      _videos.removeAt(index);
+                    });
+                  },
+                ),
+              ),
+            );
+          }),
       ],
+    );
+  }
+
+  void _addGalleryImage() {
+    final urlController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Gallery Image'),
+        content: TextField(
+          controller: urlController,
+          decoration: const InputDecoration(
+            labelText: 'Image URL *',
+            hintText: 'https://example.com/image.jpg',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (urlController.text.isNotEmpty) {
+                setState(() {
+                  _galleryImages.add(urlController.text.trim());
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _addVideo() {
+    final titleController = TextEditingController();
+    final urlController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Video'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(
+                labelText: 'Video Title *',
+                hintText: 'e.g., Campaign Speech 2024',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: urlController,
+              decoration: const InputDecoration(
+                labelText: 'Video URL *',
+                hintText: 'https://youtube.com/watch?v=...',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (titleController.text.isNotEmpty && urlController.text.isNotEmpty) {
+                setState(() {
+                  _videos.add(VideoItem(
+                    id: const Uuid().v4(),
+                    title: titleController.text.trim(),
+                    url: urlController.text.trim(),
+                  ));
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
     );
   }
 
