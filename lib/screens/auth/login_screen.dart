@@ -17,6 +17,18 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
+  // Demo credentials
+  static const String _demoEmail = 'demo@netapro.com';
+  static const String _demoPassword = 'demo123';
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill demo credentials
+    _emailController.text = _demoEmail;
+    _passwordController.text = _demoPassword;
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -139,7 +151,32 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: AppTheme.textSecondaryColor,
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 16),
+                        // Demo credentials hint
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.successColor.withAlpha(25),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppTheme.successColor.withAlpha(50)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline, color: AppTheme.successColor, size: 20),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Demo: $_demoEmail / $_demoPassword',
+                                  style: TextStyle(
+                                    color: AppTheme.successColor,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
                         TextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,

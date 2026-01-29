@@ -1,24 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../services/auth_service.dart';
+import '../services/demo_auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final AuthService _authService = AuthService();
-  User? _user;
+  final DemoAuthService _authService = DemoAuthService();
+  DemoUser? _user;
   bool _isLoading = false;
   String? _error;
 
-  User? get user => _user;
+  DemoUser? get user => _user;
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _user != null;
   String? get error => _error;
-
-  AuthProvider() {
-    _authService.authStateChanges.listen((user) {
-      _user = user;
-      notifyListeners();
-    });
-  }
 
   Future<bool> signUp({
     required String email,
@@ -30,7 +22,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _authService.signUp(
+      _user = await _authService.signUp(
         email: email,
         password: password,
         name: name,
@@ -55,7 +47,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _authService.signIn(
+      _user = await _authService.signIn(
         email: email,
         password: password,
       );
@@ -81,17 +73,11 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    try {
-      await _authService.resetPassword(email);
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _error = e.toString();
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
+    // Demo mode - just show success
+    await Future.delayed(const Duration(milliseconds: 500));
+    _isLoading = false;
+    notifyListeners();
+    return true;
   }
 
   void clearError() {

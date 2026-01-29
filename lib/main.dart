@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,18 +11,8 @@ import 'screens/profile/create_profile_screen.dart';
 import 'screens/profile/profile_view_screen.dart';
 import 'utils/app_theme.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: "AIzaSyDemo_API_Key_Replace_Me",
-      authDomain: "netapro-demo.firebaseapp.com",
-      projectId: "netapro-demo",
-      storageBucket: "netapro-demo.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:abcdef123456",
-    ),
-  );
   runApp(const NetaProApp());
 }
 

@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class ProfileModel {
   final String id;
   final String userId;
@@ -113,8 +111,8 @@ class ProfileModel {
       'upiId': upiId,
       'razorpayKey': razorpayKey,
       'views': views,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
       'isPublished': isPublished,
     };
   }
@@ -155,8 +153,8 @@ class ProfileModel {
       upiId: map['upiId'] ?? '',
       razorpayKey: map['razorpayKey'] ?? '',
       views: map['views'] ?? 0,
-      createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (map['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: map['createdAt'] is String ? DateTime.parse(map['createdAt']) : DateTime.now(),
+      updatedAt: map['updatedAt'] is String ? DateTime.parse(map['updatedAt']) : DateTime.now(),
       isPublished: map['isPublished'] ?? false,
     );
   }

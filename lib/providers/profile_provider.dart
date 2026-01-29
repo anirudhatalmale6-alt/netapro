@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/profile_model.dart';
-import '../services/profile_service.dart';
+import '../services/demo_profile_service.dart';
 
 class ProfileProvider extends ChangeNotifier {
-  final ProfileService _profileService = ProfileService();
+  final DemoProfileService _profileService = DemoProfileService();
 
   List<ProfileModel> _profiles = [];
   ProfileModel? _currentProfile;
@@ -18,10 +18,8 @@ class ProfileProvider extends ChangeNotifier {
   Map<String, int> get stats => _stats;
 
   void listenToUserProfiles(String userId) {
-    _profileService.getUserProfiles(userId).listen((profiles) {
-      _profiles = profiles;
-      notifyListeners();
-    });
+    _profiles = _profileService.getUserProfiles(userId);
+    notifyListeners();
   }
 
   Future<void> loadUserStats(String userId) async {
@@ -36,6 +34,7 @@ class ProfileProvider extends ChangeNotifier {
 
     try {
       final created = await _profileService.createProfile(profile);
+      _profiles = _profileService.getUserProfiles(profile.userId);
       _isLoading = false;
       notifyListeners();
       return created;
@@ -55,6 +54,7 @@ class ProfileProvider extends ChangeNotifier {
     try {
       await _profileService.updateProfile(profile);
       _currentProfile = profile;
+      _profiles = _profileService.getUserProfiles(profile.userId);
       _isLoading = false;
       notifyListeners();
       return true;
